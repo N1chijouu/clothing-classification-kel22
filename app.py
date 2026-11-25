@@ -118,6 +118,7 @@ st.markdown(
     .info-bar { background:var(--card); border:1px solid var(--stroke);
         color:#BBD3C7; border-radius:10px; padding:11px 14px;
         font-size:12px; line-height:1.7; }
+    .st-key-confusion_matrix_button { padding-top: 12px !important; }
     .compare-table { width:100%; border-collapse:collapse; background:var(--card);
         border:1px solid var(--stroke); border-radius:12px; overflow:hidden; }
     .compare-table th { text-align:left; background:#20343A; color:#D2E7DE;
@@ -396,7 +397,7 @@ if st.session_state.page == 'eksperimen':
         st.caption('Baris adalah label sebenarnya; kolom merupakan prediksi model.')
 
     if matrix_file.exists():
-        if st.button('Lihat confusion matrix'):
+        if st.button('Lihat confusion matrix', key='confusion_matrix_button'):
             show_confusion_matrix()
     st.caption('Pengujian akhir tidak digunakan untuk memilih model terbaik.')
 
