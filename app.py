@@ -150,15 +150,35 @@ st.markdown(
     /* Setelah upload, cukup tampilkan kontrol kecil di atas preview foto. */
     .st-key-replace_photo button,
     .st-key-remove_photo button {
-        min-height: 30px !important;
-        height: 30px !important;
-        padding: 4px 9px !important;
-        font-size: 11px !important;
+        box-sizing: border-box !important;
+        min-height: 34px !important;
+        height: auto !important;
+        min-width: 0 !important;
+        padding: 6px 8px !important;
+        font-size: 12px !important;
         font-weight: 650 !important;
         border-radius: 8px !important;
         width: 100% !important;
-        white-space: nowrap !important;
+        white-space: normal !important;
+        line-height: 1.3 !important;
+        text-align: center !important;
         box-shadow: none !important;
+    }
+    /* Streamlit renders the button caption as a nested Markdown paragraph. */
+    .st-key-replace_photo button p,
+    .st-key-remove_photo button p {
+        font-size: 12px !important;
+        font-weight: 650 !important;
+        line-height: 1.3 !important;
+        margin: 0 !important;
+        white-space: normal !important;
+        overflow-wrap: normal !important;
+        text-align: center !important;
+    }
+    .st-key-replace_photo button [data-testid="stMarkdownContainer"],
+    .st-key-remove_photo button [data-testid="stMarkdownContainer"] {
+        min-width: 0 !important;
+        max-width: 100% !important;
     }
     .st-key-remove_photo button { color: #E4A6A0 !important; }
     .st-key-remove_photo button:hover {
@@ -404,7 +424,7 @@ else:
         else:
             # Kontrol menyatu dengan judul kolom, tanpa kartu status file yang memakan tempat.
             label_col, change_col, clear_col = st.columns(
-                [5.0, 1.5, 1.5], gap='small', vertical_alignment='center'
+                [3.0, 2.4, 1.6], gap='small', vertical_alignment='center'
             )
             with label_col:
                 st.markdown('<div class="column-label">Foto pakaian</div>', unsafe_allow_html=True)
