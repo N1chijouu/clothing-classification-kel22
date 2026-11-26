@@ -233,7 +233,7 @@ st.markdown(
     [data-testid="stFileUploaderDropzone"] > * { min-width:0 !important; }
     [data-testid="stFileUploaderDropzone"] button { flex-shrink:0 !important; }
     @media (max-width:850px) {
-        .block-container { padding:3.5rem 14px 4rem !important; }
+        .block-container { padding:1.5rem 14px 4rem !important; }
         .st-key-navigation [data-testid="stHorizontalBlock"] {
             display:grid !important; grid-template-columns:minmax(0, .8fr) minmax(0, 1.2fr); gap:8px !important;
         }
@@ -283,6 +283,27 @@ st.markdown(
         [data-testid="stImage"] img { max-height:360px; }
         .prob-wrap { padding:10px; }
         .result .name { font-size:25px; }
+    }
+    /* Keep the live camera frame uncropped; react-webcam uses a video element. */
+    [data-testid="stCameraInput"] video {
+        display:block !important; width:100% !important; height:auto !important;
+        max-height:65vh !important; aspect-ratio:auto !important;
+        object-fit:contain !important; object-position:center !important;
+        background:#0D1519 !important;
+    }
+    [data-testid="stCameraInput"] div:has(> video) {
+        height:auto !important; max-height:none !important;
+        aspect-ratio:auto !important; overflow:visible !important;
+    }
+    @media (max-width:850px) {
+        .st-key-navigation .brand { padding:4px 0 12px !important; }
+        .st-key-navigation [data-testid="stHorizontalBlock"] { row-gap:12px !important; }
+        .st-key-photo_toolbar [data-testid="stHorizontalBlock"] { row-gap:10px !important; }
+        .st-key-photo_toolbar .column-label { margin-bottom:5px !important; }
+        .divider-line { margin:12px 0 10px !important; }
+        .st-key-photo_panel .column-label { margin-top:6px; }
+        [data-testid="stCameraInput"] video { max-height:60vh !important; }
+        [data-testid="stCameraInput"] button { margin-top:8px !important; }
     }
     </style>
     """,
