@@ -224,44 +224,63 @@ st.markdown(
     .metric .number, .compare-name, .compare-answer { overflow-wrap:anywhere; }
     .brand-mark { flex-shrink:0; }
     [data-testid="stImage"] img { max-width:100%; }
+    /* Keep uploader in its natural document flow, including Safari. */
+    [data-testid="stFileUploaderDropzone"] {
+        height:auto !important; max-height:none !important;
+        box-sizing:border-box !important; overflow:visible !important;
+        flex-wrap:wrap !important; gap:10px !important;
+    }
+    [data-testid="stFileUploaderDropzone"] > * { min-width:0 !important; }
+    [data-testid="stFileUploaderDropzone"] button { flex-shrink:0 !important; }
     @media (max-width:850px) {
-        .block-container { padding:1rem 1.25rem 1.5rem !important; }
-        .metric-row { grid-template-columns:1fr; gap:8px; }
-        .photo-blank { height:200px; }
-        .result-empty { height:auto; min-height:150px; padding:18px; }
-        .page-title { font-size:23px; }
-        .brand-name { font-size:16px; }
-        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] .st-key-photo_panel):has(> [data-testid="stColumn"] .st-key-result_panel) {
-            flex-direction:column !important; gap:1rem !important;
+        .block-container { padding:3.5rem 14px 4rem !important; }
+        .st-key-navigation [data-testid="stHorizontalBlock"] {
+            display:grid !important; grid-template-columns:minmax(0, .8fr) minmax(0, 1.2fr); gap:8px !important;
         }
-        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] .st-key-photo_panel):has(> [data-testid="stColumn"] .st-key-result_panel) > [data-testid="stColumn"] {
-            width:100% !important; flex:1 1 auto !important; min-width:0 !important;
+        .st-key-navigation [data-testid="stHorizontalBlock"] > * {
+            width:100% !important; min-width:0 !important; flex:none !important;
         }
-        .st-key-navigation > [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"] {
-            display:grid !important; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:8px !important;
-        }
-        .st-key-navigation > [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
-            width:100% !important; min-width:0 !important;
-        }
-        .st-key-navigation > [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:first-child { grid-column:1 / -1; }
+        .st-key-navigation [data-testid="stHorizontalBlock"] > :first-child { grid-column:1 / -1; }
         .st-key-navigation button, .st-key-photo_panel button { min-height:44px !important; white-space:normal !important; }
+        .st-key-navigation button p { font-size:13px !important; line-height:1.3 !important; }
         .st-key-photo_toolbar [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:1fr 1fr; gap:8px !important; }
-        .st-key-photo_toolbar [data-testid="stColumn"] { width:100% !important; min-width:0 !important; }
-        .st-key-photo_toolbar [data-testid="stColumn"]:first-child { grid-column:1 / -1; }
-        [data-testid="stFileUploaderDropzone"] { flex-wrap:wrap; gap:8px; padding:12px !important; }
-        [data-testid="stFileUploaderDropzone"] button { min-height:44px; width:100%; }
-        .prob-row { grid-template-columns: minmax(65px, 84px) minmax(0,1fr) 45px; gap:6px; min-height:18px; }
+        .st-key-photo_toolbar [data-testid="stHorizontalBlock"] > * { width:100% !important; min-width:0 !important; }
+        .st-key-photo_toolbar [data-testid="stHorizontalBlock"] > :first-child { grid-column:1 / -1; }
+        [data-testid="stHorizontalBlock"]:has(.st-key-photo_panel):has(.st-key-result_panel) {
+            flex-direction:column !important; gap:16px !important;
+        }
+        [data-testid="stHorizontalBlock"]:has(.st-key-photo_panel):has(.st-key-result_panel) > * {
+            width:100% !important; flex:none !important; min-width:0 !important;
+        }
+        .st-key-photo_panel [data-testid="stVerticalBlock"], .st-key-result_panel [data-testid="stVerticalBlock"] { gap:8px !important; }
+        .st-key-input_mode label { min-height:36px !important; }
+        .input-help { margin:0; }
+        [data-testid="stFileUploader"] { height:auto !important; min-height:0 !important; overflow:visible !important; }
+        [data-testid="stFileUploaderDropzone"] {
+            display:flex !important; flex-direction:column !important; align-items:stretch !important;
+            height:auto !important; min-height:0 !important; max-height:none !important;
+            flex-wrap:nowrap !important; padding:14px !important; gap:12px !important;
+        }
+        [data-testid="stFileUploaderDropzone"] button {
+            position:static !important; width:100% !important; min-height:44px !important;
+            flex:none !important; margin:0 !important; transform:none !important;
+        }
+        [data-testid="stFileUploaderDropzoneInstructions"] { min-width:0 !important; width:100% !important; }
+        [data-testid="stFileUploaderDropzoneInstructions"] span,
+        [data-testid="stFileUploaderDropzoneInstructions"] small { white-space:normal !important; overflow-wrap:anywhere; font-size:12px !important; }
+        .photo-blank { display:none !important; }
+        .result-empty { height:auto; min-height:100px; padding:16px; gap:5px; }
+        .page-title { font-size:22px; }
+        .page-subtitle { margin-bottom:4px; line-height:1.5; }
+        .brand-name { font-size:16px; }
+        .metric-row { grid-template-columns:1fr; gap:8px; }
+        .prob-row { grid-template-columns:minmax(65px,84px) minmax(0,1fr) 45px; gap:6px; min-height:18px; }
         .prob-name, .prob-value { font-size:12px; }
         .compare-table th, .compare-table td { padding:10px 9px; font-size:12px; }
         .compare-row { flex-wrap:wrap; padding:10px; }
         .metric { padding:14px; }
         .result { padding:15px; }
         [data-testid="stImage"] img { max-height:360px; }
-    }
-    @media (max-width:480px) {
-        .block-container { padding-left:14px !important; padding-right:14px !important; }
-        .page-title { font-size:22px; }
-        .page-subtitle { line-height:1.5; }
         .prob-wrap { padding:10px; }
         .result .name { font-size:25px; }
     }
