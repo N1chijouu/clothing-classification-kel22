@@ -211,13 +211,59 @@ st.markdown(
     [data-testid="stExpander"] { background:var(--card) !important;
         border:1px solid var(--stroke) !important; }
 
+    /* Layout responsif: hanya baris yang ditandai, bukan semua kolom Streamlit. */
+    .st-key-input_mode button, .st-key-input_mode label { min-height:44px; }
+    [data-testid="stCameraInput"] { width:100%; min-width:0; }
+    [data-testid="stCameraInput"] video, [data-testid="stCameraInput"] img {
+        max-width:100%; height:auto; border-radius:12px; object-fit:contain;
+    }
+    [data-testid="stCameraInput"] button { min-height:44px; border-radius:10px; }
+    .input-help { color:var(--muted); font-size:12px; line-height:1.5; margin:4px 0 9px; }
+    .table-scroll { overflow-x:auto; max-width:100%; border-radius:12px; }
+    .compare-table { min-width:330px; }
+    .metric .number, .compare-name, .compare-answer { overflow-wrap:anywhere; }
+    .brand-mark { flex-shrink:0; }
+    [data-testid="stImage"] img { max-width:100%; }
     @media (max-width:850px) {
-        .block-container { padding-top:.8rem; }
-        .metric-row { grid-template-columns:1fr; }
-        .photo-blank { height:218px; }
-        .result-empty { height:218px; }
+        .block-container { padding:1rem 1.25rem 1.5rem !important; }
+        .metric-row { grid-template-columns:1fr; gap:8px; }
+        .photo-blank { height:200px; }
+        .result-empty { height:auto; min-height:150px; padding:18px; }
         .page-title { font-size:23px; }
-        .brand-name { font-size:15px; }
+        .brand-name { font-size:16px; }
+        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] .st-key-photo_panel):has(> [data-testid="stColumn"] .st-key-result_panel) {
+            flex-direction:column !important; gap:1rem !important;
+        }
+        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] .st-key-photo_panel):has(> [data-testid="stColumn"] .st-key-result_panel) > [data-testid="stColumn"] {
+            width:100% !important; flex:1 1 auto !important; min-width:0 !important;
+        }
+        .st-key-navigation > [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"] {
+            display:grid !important; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:8px !important;
+        }
+        .st-key-navigation > [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+            width:100% !important; min-width:0 !important;
+        }
+        .st-key-navigation > [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:first-child { grid-column:1 / -1; }
+        .st-key-navigation button, .st-key-photo_panel button { min-height:44px !important; white-space:normal !important; }
+        .st-key-photo_toolbar [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:1fr 1fr; gap:8px !important; }
+        .st-key-photo_toolbar [data-testid="stColumn"] { width:100% !important; min-width:0 !important; }
+        .st-key-photo_toolbar [data-testid="stColumn"]:first-child { grid-column:1 / -1; }
+        [data-testid="stFileUploaderDropzone"] { flex-wrap:wrap; gap:8px; padding:12px !important; }
+        [data-testid="stFileUploaderDropzone"] button { min-height:44px; width:100%; }
+        .prob-row { grid-template-columns: minmax(65px, 84px) minmax(0,1fr) 45px; gap:6px; min-height:18px; }
+        .prob-name, .prob-value { font-size:12px; }
+        .compare-table th, .compare-table td { padding:10px 9px; font-size:12px; }
+        .compare-row { flex-wrap:wrap; padding:10px; }
+        .metric { padding:14px; }
+        .result { padding:15px; }
+        [data-testid="stImage"] img { max-height:360px; }
+    }
+    @media (max-width:480px) {
+        .block-container { padding-left:14px !important; padding-right:14px !important; }
+        .page-title { font-size:22px; }
+        .page-subtitle { line-height:1.5; }
+        .prob-wrap { padding:10px; }
+        .result .name { font-size:25px; }
     }
     </style>
     """,
@@ -305,8 +351,8 @@ def comparison_table_html(frame):
         rows.append('<tr><td>' + escape(str(item['model'])) + '</td><td>'
                     + f"{float(item['accuracy']):.2%}" + '</td><td>'
                     + f"{float(item['macro_f1']):.2%}" + '</td></tr>')
-    return ('<table class="compare-table"><thead><tr><th>Model</th><th>Accuracy</th>'
-            '<th>Macro F1</th></tr></thead><tbody>' + ''.join(rows) + '</tbody></table>')
+    return ('<div class="table-scroll"><table class="compare-table"><thead><tr><th>Model</th><th>Accuracy</th>'
+            '<th>Macro F1</th></tr></thead><tbody>' + ''.join(rows) + '</tbody></table></div>')
 
 
 def go_to(page):
@@ -325,22 +371,23 @@ if 'photo_name' not in st.session_state:
 if 'photo_size' not in st.session_state:
     st.session_state.photo_size = 0
 
-nav_brand, nav_predict, nav_summary = st.columns([5.5, 1.25, 1.65], gap='small')
-with nav_brand:
-    st.markdown(
-        '<div class="brand"><span class="brand-mark">C</span><div>'
-        '<div class="brand-name">Clothing Classifier</div>'
-        '<div class="brand-sub">Klasifikasi pakaian · 8 kategori</div></div></div>',
-        unsafe_allow_html=True,
-    )
-with nav_predict:
-    st.button('Prediksi', use_container_width=True,
-              type='primary' if st.session_state.page == 'prediksi' else 'secondary',
-              on_click=go_to, args=('prediksi',))
-with nav_summary:
-    st.button('Ringkasan eksperimen', use_container_width=True,
-              type='primary' if st.session_state.page == 'eksperimen' else 'secondary',
-              on_click=go_to, args=('eksperimen',))
+with st.container(key='navigation'):
+    nav_brand, nav_predict, nav_summary = st.columns([5.5, 1.25, 1.65], gap='small')
+    with nav_brand:
+        st.markdown(
+            '<div class="brand"><span class="brand-mark">C</span><div>'
+            '<div class="brand-name">Clothing Classifier</div>'
+            '<div class="brand-sub">Klasifikasi pakaian · 8 kategori</div></div></div>',
+            unsafe_allow_html=True,
+        )
+    with nav_predict:
+        st.button('Prediksi', use_container_width=True,
+                  type='primary' if st.session_state.page == 'prediksi' else 'secondary',
+                  on_click=go_to, args=('prediksi',))
+    with nav_summary:
+        st.button('Ringkasan eksperimen', use_container_width=True,
+                  type='primary' if st.session_state.page == 'eksperimen' else 'secondary',
+                  on_click=go_to, args=('eksperimen',))
 st.markdown('<div class="divider-line"></div>', unsafe_allow_html=True)
 
 info_path = ARTIFACTS / 'experiment.json'
@@ -404,131 +451,149 @@ if st.session_state.page == 'eksperimen':
 else:
     # Halaman utama: upload, foto, prediksi dan probabilitas dalam satu tampilan.
     st.markdown('<div class="page-title">Klasifikasi jenis pakaian</div>', unsafe_allow_html=True)
-    st.markdown('<div class="page-subtitle">Unggah foto satu jenis pakaian untuk melihat hasil prediksi.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="page-subtitle">Unggah foto atau ambil gambar langsung dengan kamera.</div>', unsafe_allow_html=True)
 
     left, right = st.columns([1, 1.05], gap='large')
     with left:
-        # Setelah foto diunggah, nama file panjang tidak ditampilkan.
-        # Preview langsung menjadi fokus, sedangkan Ganti/Hapus tetap mudah dijangkau.
-        if st.session_state.photo_bytes is None:
-            st.markdown('<div class="column-label">Foto pakaian</div>', unsafe_allow_html=True)
-            upload = st.file_uploader(
-                'Pilih gambar', type=['jpg', 'jpeg', 'png', 'webp'],
-                label_visibility='collapsed',
-                key=f'photo_upload_{st.session_state.upload_rev}',
-            )
-            if upload is not None:
-                st.session_state.photo_bytes = upload.getvalue()
-                st.session_state.photo_name = upload.name
-                st.session_state.photo_size = len(st.session_state.photo_bytes)
-                st.rerun()
-        else:
-            # Kontrol menyatu dengan judul kolom, tanpa kartu status file yang memakan tempat.
-            label_col, change_col, clear_col = st.columns(
-                [3.0, 2.4, 1.6], gap='small', vertical_alignment='center'
-            )
-            with label_col:
+        with st.container(key='photo_panel'):
+            # Setelah foto diunggah, nama file panjang tidak ditampilkan.
+            # Preview langsung menjadi fokus, sedangkan Ganti/Hapus tetap mudah dijangkau.
+            if st.session_state.photo_bytes is None:
                 st.markdown('<div class="column-label">Foto pakaian</div>', unsafe_allow_html=True)
-            with change_col:
-                if st.button('Ganti foto', use_container_width=True, key='replace_photo',
-                             help='Pilih gambar pakaian lain'):
+                input_mode = st.radio(
+                    'Sumber foto', ['Unggah foto', 'Kamera'], horizontal=True,
+                    key='input_mode', label_visibility='collapsed',
+                )
+                if input_mode == 'Kamera':
+                    st.markdown('<div class="input-help">Izinkan akses kamera, arahkan ke pakaian, lalu ambil foto.</div>', unsafe_allow_html=True)
+                    upload = st.camera_input(
+                        'Ambil foto pakaian', label_visibility='collapsed',
+                        key=f'photo_camera_{st.session_state.upload_rev}',
+                    )
+                    st.caption('Jika kamera tidak tersedia, pilih Unggah foto untuk memilih gambar dari HP.')
+                else:
+                    st.markdown('<div class="input-help">Seret foto ke kotak di bawah atau pilih dari galeri/perangkat.</div>', unsafe_allow_html=True)
+                    upload = st.file_uploader(
+                        'Pilih atau seret gambar', type=['jpg', 'jpeg', 'png', 'webp'],
+                        label_visibility='collapsed',
+                        key=f'photo_upload_{st.session_state.upload_rev}',
+                    )
+                if upload is not None:
+                    st.session_state.photo_bytes = upload.getvalue()
+                    st.session_state.photo_name = upload.name
+                    st.session_state.photo_size = len(st.session_state.photo_bytes)
+                    st.rerun()
+            else:
+                # Kontrol menyatu dengan judul kolom, tanpa kartu status file yang memakan tempat.
+                with st.container(key='photo_toolbar'):
+                    label_col, change_col, clear_col = st.columns(
+                        [3.0, 2.4, 1.6], gap='small', vertical_alignment='center'
+                    )
+                    with label_col:
+                        st.markdown('<div class="column-label">Foto pakaian</div>', unsafe_allow_html=True)
+                    with change_col:
+                        if st.button('Ganti foto', use_container_width=True, key='replace_photo',
+                                     help='Pilih gambar pakaian lain'):
+                            st.session_state.photo_bytes = None
+                            st.session_state.upload_rev += 1
+                            st.rerun()
+                    with clear_col:
+                        if st.button('Hapus', use_container_width=True, key='remove_photo',
+                                     help='Hapus gambar dari tampilan'):
+                            st.session_state.photo_bytes = None
+                            st.session_state.photo_name = 'foto_pakaian'
+                            st.session_state.photo_size = 0
+                            st.session_state.upload_rev += 1
+                            st.rerun()
+            photo = None
+            if st.session_state.photo_bytes is not None:
+                try:
+                    photo = read_image(Image.open(BytesIO(st.session_state.photo_bytes)))
+                    st.image(photo, use_container_width=True)
+                except Exception as error:
+                    st.error(f'File gambar gagal dibuka: {error}')
                     st.session_state.photo_bytes = None
                     st.session_state.upload_rev += 1
-                    st.rerun()
-            with clear_col:
-                if st.button('Hapus', use_container_width=True, key='remove_photo',
-                             help='Hapus gambar dari tampilan'):
-                    st.session_state.photo_bytes = None
-                    st.session_state.photo_name = 'foto_pakaian'
-                    st.session_state.photo_size = 0
-                    st.session_state.upload_rev += 1
-                    st.rerun()
-        photo = None
-        if st.session_state.photo_bytes is not None:
-            try:
-                photo = read_image(Image.open(BytesIO(st.session_state.photo_bytes)))
-                st.image(photo, use_container_width=True)
-            except Exception as error:
-                st.error(f'File gambar gagal dibuka: {error}')
-                st.session_state.photo_bytes = None
-        else:
-            st.markdown(
-                '<div class="photo-blank">'
-                '<svg class="photo-icon" viewBox="0 0 48 48" fill="none" '
-                'xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
-                '<rect x="7" y="9" width="34" height="30" rx="5" '
-                'stroke="currentColor" stroke-width="2"/>'
-                '<circle cx="18" cy="19" r="3" fill="currentColor"/>'
-                '<path d="M10 33l10-9 7 6 5-5 7 8" stroke="currentColor" '
-                'stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
-                '</svg>'
-                '<strong>Belum ada gambar</strong><span>JPG, PNG, atau WEBP</span></div>',
-                unsafe_allow_html=True,
-            )
-
-    with right:
-        st.markdown('<div class="column-label">Hasil prediksi</div>', unsafe_allow_html=True)
-        if photo is None:
-            st.markdown(
-                '<div class="result-empty"><div class="empty-mark">✦</div>'
-                '<strong>Siap untuk memprediksi</strong>'
-                '<span>Unggah satu foto pakaian untuk melihat kategori dan '
-                'skor prediksi dari model.</span></div>',
-                unsafe_allow_html=True,
-            )
-            st.markdown('<div class="mini-label">Model utama dipilih berdasarkan nilai Macro F1 validation.</div>',
-                        unsafe_allow_html=True)
-        else:
-            try:
-                if not (ARTIFACTS / 'cnn.pt').exists():
-                    st.error('Bobot CNN belum tersedia. Jalankan training terlebih dahulu.')
-                    st.stop()
-                version = (ARTIFACTS / 'cnn.pt').stat().st_mtime_ns
-                with st.spinner('Memproses gambar...'):
-                    cnn = load_cnn(version)
-                    tensor, cnn_prob = predict_cnn(photo, cnn)
-                    winner = metadata.get('validation_winner', 'CNN')
-                    probabilities = cnn_prob
-                    predictions = {'CNN': cnn_prob}
-                    if winner != 'CNN':
-                        needed = ['encoder.pt', 'logistic.joblib', 'forest.joblib']
-                        if any(not (ARTIFACTS / name).exists() for name in needed):
-                            st.error('Bobot model terbaik belum lengkap.')
-                            st.stop()
-                        versions = tuple((ARTIFACTS / name).stat().st_mtime_ns for name in needed)
-                        encoder, logistic, forest = load_other_models(versions)
-                        predictions.update(predict_other_models(tensor, classes, encoder, logistic, forest))
-                        probabilities = predictions[winner]
-
-                idx = int(np.argmax(probabilities))
+                    st.button('Pilih foto lain', key='retry_photo')
+            else:
                 st.markdown(
-                    '<div class="result"><small>Prediksi · ' + escape(winner) + '</small>'
-                    '<div class="name">' + escape(classes[idx]) + '</div>'
-                    '<div class="conf">Skor model: ' + f'{float(probabilities[idx]):.1%}' + '</div></div>',
+                    '<div class="photo-blank">'
+                    '<svg class="photo-icon" viewBox="0 0 48 48" fill="none" '
+                    'xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+                    '<rect x="7" y="9" width="34" height="30" rx="5" '
+                    'stroke="currentColor" stroke-width="2"/>'
+                    '<circle cx="18" cy="19" r="3" fill="currentColor"/>'
+                    '<path d="M10 33l10-9 7 6 5-5 7 8" stroke="currentColor" '
+                    'stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+                    '</svg>'
+                    '<strong>Belum ada gambar</strong><span>JPG, PNG, atau WEBP</span></div>',
                     unsafe_allow_html=True,
                 )
-                st.markdown(probability_html(classes, probabilities), unsafe_allow_html=True)
-                st.markdown('<div class="mini-label">Skor probabilitas bukan jaminan prediksi benar.</div>',
-                            unsafe_allow_html=True)
 
-                # Model pembanding hanya dimuat jika diminta untuk mengurangi beban awal PC.
-                if st.toggle('Bandingkan prediksi 3 model', value=False):
-                    needed = ['encoder.pt', 'logistic.joblib', 'forest.joblib']
-                    if any(not (ARTIFACTS / name).exists() for name in needed):
-                        st.info('Model pembanding belum tersedia.')
-                    else:
-                        versions = tuple((ARTIFACTS / name).stat().st_mtime_ns for name in needed)
-                        encoder, logistic, forest = load_other_models(versions)
-                        if len(predictions) == 1:
+    with right:
+        with st.container(key='result_panel'):
+            st.markdown('<div class="column-label">Hasil prediksi</div>', unsafe_allow_html=True)
+            if photo is None:
+                st.markdown(
+                    '<div class="result-empty"><div class="empty-mark">✦</div>'
+                    '<strong>Siap untuk memprediksi</strong>'
+                    '<span>Unggah atau ambil satu foto pakaian untuk melihat kategori dan '
+                    'skor prediksi dari model.</span></div>',
+                    unsafe_allow_html=True,
+                )
+                st.markdown('<div class="mini-label">Model utama dipilih berdasarkan nilai Macro F1 validation.</div>',
+                            unsafe_allow_html=True)
+            else:
+                try:
+                    if not (ARTIFACTS / 'cnn.pt').exists():
+                        st.error('Bobot CNN belum tersedia. Jalankan training terlebih dahulu.')
+                        st.stop()
+                    version = (ARTIFACTS / 'cnn.pt').stat().st_mtime_ns
+                    with st.spinner('Memproses gambar...'):
+                        cnn = load_cnn(version)
+                        tensor, cnn_prob = predict_cnn(photo, cnn)
+                        winner = metadata.get('validation_winner', 'CNN')
+                        probabilities = cnn_prob
+                        predictions = {'CNN': cnn_prob}
+                        if winner != 'CNN':
+                            needed = ['encoder.pt', 'logistic.joblib', 'forest.joblib']
+                            if any(not (ARTIFACTS / name).exists() for name in needed):
+                                st.error('Bobot model terbaik belum lengkap.')
+                                st.stop()
+                            versions = tuple((ARTIFACTS / name).stat().st_mtime_ns for name in needed)
+                            encoder, logistic, forest = load_other_models(versions)
                             predictions.update(predict_other_models(tensor, classes, encoder, logistic, forest))
-                        for name in ['CNN', 'Logistic Regression', 'Random Forest']:
-                            scores = predictions[name]
-                            pos = int(np.argmax(scores))
-                            st.markdown(
-                                '<div class="compare-row"><span class="compare-name">' + escape(name) + '</span>'
-                                '<span class="compare-answer">' + escape(classes[pos])
-                                + f' · {float(scores[pos]):.1%}' + '</span></div>',
-                                unsafe_allow_html=True,
-                            )
-            except Exception as error:
-                st.error(f'Prediksi gagal: {error}')
+                            probabilities = predictions[winner]
+
+                    idx = int(np.argmax(probabilities))
+                    st.markdown(
+                        '<div class="result"><small>Prediksi · ' + escape(winner) + '</small>'
+                        '<div class="name">' + escape(classes[idx]) + '</div>'
+                        '<div class="conf">Skor model: ' + f'{float(probabilities[idx]):.1%}' + '</div></div>',
+                        unsafe_allow_html=True,
+                    )
+                    st.markdown(probability_html(classes, probabilities), unsafe_allow_html=True)
+                    st.markdown('<div class="mini-label">Skor probabilitas bukan jaminan prediksi benar.</div>',
+                                unsafe_allow_html=True)
+
+                    # Model pembanding hanya dimuat jika diminta untuk mengurangi beban awal PC.
+                    if st.toggle('Bandingkan prediksi 3 model', value=False):
+                        needed = ['encoder.pt', 'logistic.joblib', 'forest.joblib']
+                        if any(not (ARTIFACTS / name).exists() for name in needed):
+                            st.info('Model pembanding belum tersedia.')
+                        else:
+                            versions = tuple((ARTIFACTS / name).stat().st_mtime_ns for name in needed)
+                            encoder, logistic, forest = load_other_models(versions)
+                            if len(predictions) == 1:
+                                predictions.update(predict_other_models(tensor, classes, encoder, logistic, forest))
+                            for name in ['CNN', 'Logistic Regression', 'Random Forest']:
+                                scores = predictions[name]
+                                pos = int(np.argmax(scores))
+                                st.markdown(
+                                    '<div class="compare-row"><span class="compare-name">' + escape(name) + '</span>'
+                                    '<span class="compare-answer">' + escape(classes[pos])
+                                    + f' · {float(scores[pos]):.1%}' + '</span></div>',
+                                    unsafe_allow_html=True,
+                                )
+                except Exception as error:
+                    st.error(f'Prediksi gagal: {error}')
